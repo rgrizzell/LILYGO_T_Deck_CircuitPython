@@ -45,3 +45,6 @@ py-modules = ["lilygo_tdeck"]
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies = {optional = {file = ["optional_requirements.txt"]}}
+
+[circup]
+circup_dependencies = ["gt911"]

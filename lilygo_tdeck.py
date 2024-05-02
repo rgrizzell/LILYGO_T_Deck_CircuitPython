@@ -22,6 +22,8 @@ Implementation Notes
 
 * Adafruit CircuitPython firmware for the supported boards:
   https://circuitpython.org/downloads
+* CircuitPython GT911 touchscreen driver:
+  https://github.com/rgrizzell/CircuitPython_GT911
 """
 import sys
 import audiobusio
@@ -29,7 +31,6 @@ import board
 import storage
 from countio import Counter
 
-# from digitalio import DigitalInOut
 from keypad import Event, Keys
 from micropython import const
 from sdcardio import SDCard
@@ -46,7 +47,7 @@ __repo__ = "https://github.com/rgrizzell/CircuitPython_LILYGO_T-Deck.git"
 
 _KEYBOARD_I2C_ADDR = const(0x55)
 _MICROPHONE_I2C_ADDR = const(0x40)
-_TOUCHSCREEN_I2C_ADDR = const(0x14)
+_TOUCHSCREEN_I2C_ADDR = const(0x5D)
 
 
 class Keyboard:
@@ -127,7 +128,7 @@ class Trackball:
         return event
 
 
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,too-many-instance-attributes
 class TDeck:
     """Class representing the LILYGO T-Deck.
 
@@ -155,9 +156,15 @@ class TDeck:
 
         # Touchscreen
         self._debug("Init touchscreen")
-        # TODO: Create driver: https://github.com/rgrizzell/CircuitPython_GT911
-        # int_pin = DigitalInOut(board.TOUCH_INT)
-        # self.touchscreen = GT911(self._i2c, _TOUCHSCREEN_I2C_ADDR, int_pin=int_pin)
+        try:
+            # pylint: disable=import-outside-toplevel
+            from gt911 import GT911
+            from digitalio import DigitalInOut
+
+            int_pin = DigitalInOut(board.TOUCH_INT)
+            self.touchscreen = GT911(self._i2c, _TOUCHSCREEN_I2C_ADDR, int_pin=int_pin)
+        except ImportError:
+            self._debug("Touchscreen disabled: gt911 library not installed")
 
         # Keyboard
         self._debug("Init keyboard")
